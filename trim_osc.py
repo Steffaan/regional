@@ -67,6 +67,7 @@ parser.add_argument('--user', default=default_user,
                     help='user name for db (default: {0})'.format(default_user))
 parser.add_argument('--password', action='store_true', help='ask for password', default=False)
 parser.add_argument('-p', '--poly', type=argparse.FileType('r'), help='osmosis polygon file')
+parser.add_argument('-P', '--prefix', help='prefix to the osm tables Default: planet_osm', default='planet_osm')
 parser.add_argument('-b', '--bbox', nargs=4, type=float,
                     metavar=('Xmin', 'Ymin', 'Xmax', 'Ymax'), help='Bounding box')
 parser.add_argument('-z', '--gzip', action='store_true', help='source and output files are gzipped')
@@ -86,6 +87,10 @@ if poly is None or not options.dbname:
     parser.print_help()
     sys.exit()
 
+dbprefix = "planet_osm"
+if options.prefix:
+    dbprefix = options.prefix
+    
 # connect to database
 passwd = ""
 if options.password:
@@ -118,7 +123,7 @@ for node in root.iter('node'):
             nodesM.append(int(node.get('id')))
 
 # Save modified nodes that are already in the database
-cur.execute('select id from planet_osm_nodes where id = ANY(%s);', (nodesM,))
+cur.execute('select id from {0!s}_nodes where id = ANY({1!s});'.format(dbprefix, (nodesM,)))
 for row in cur:
     nodes[str(row[0])] = True
 
@@ -147,7 +152,7 @@ for way in root.iter('way'):
             if way.getparent().tag == 'modify':
                 waysM.append(wayId)
 
-cur.execute('select id from planet_osm_ways where id = ANY(%s);', (waysM,))
+cur.execute('select id from {0!s}_ways where id = ANY({1!s});'.format(dbprefix,(waysM,)))
 for row in cur:
     ways.remove(row[0])
     # iterate over osmChange/<mode>/way[id=<id>]/nd and set nodes[ref] to True
@@ -163,7 +168,7 @@ for rel in root.iter('relation'):
     if rel.getparent().tag == 'modify':
         relations.append(int(rel.get('id')))
 
-cur.execute('select id from planet_osm_rels where id = ANY(%s);', (relations,))
+cur.execute('select id from {0!s}_rels where id = ANY({1!s);'.planet(dbprefix,(relations,)))
 for row in cur:
     relations.remove(row[0])
 

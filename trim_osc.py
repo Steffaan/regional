@@ -168,7 +168,7 @@ for rel in root.iter('relation'):
     if rel.getparent().tag == 'modify':
         relations.append(int(rel.get('id')))
 
-cur.execute('select id from {0!s}_rels where id = ANY({1!s);'.format(dbprefix, '\'{' + (','.join(str(x) for x in relations)) + '}\''))
+cur.execute('select id from {0!s}_rels where id = ANY({1!s});'.format(dbprefix, '\'{' + (','.join(str(x) for x in relations)) + '}\''))
 for row in cur:
     relations.remove(row[0])
 

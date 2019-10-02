@@ -123,7 +123,7 @@ for node in root.iter('node'):
             nodesM.append(int(node.get('id')))
 
 # Save modified nodes that are already in the database
-cur.execute('select id from {0!s}_nodes where id = ANY({1!s});'.format(dbprefix, (nodesM,)))
+cur.execute('select id from {0!s}_nodes where id = ANY({1!s});'.format(dbprefix, '\'{' + (','.join(str(x) for x in nodesM)) + '}\''))
 for row in cur:
     nodes[str(row[0])] = True
 
@@ -152,7 +152,7 @@ for way in root.iter('way'):
             if way.getparent().tag == 'modify':
                 waysM.append(wayId)
 
-cur.execute('select id from {0!s}_ways where id = ANY({1!s});'.format(dbprefix,(waysM,)))
+cur.execute('select id from {0!s}_ways where id = ANY({1!s});'.format(dbprefix, '\'{' + (','.join(str(x) for x in waysM)) + '}\''))
 for row in cur:
     ways.remove(row[0])
     # iterate over osmChange/<mode>/way[id=<id>]/nd and set nodes[ref] to True
@@ -168,7 +168,7 @@ for rel in root.iter('relation'):
     if rel.getparent().tag == 'modify':
         relations.append(int(rel.get('id')))
 
-cur.execute('select id from {0!s}_rels where id = ANY({1!s);'.planet(dbprefix,(relations,)))
+cur.execute('select id from {0!s}_rels where id = ANY({1!s);'.format(dbprefix, '\'{' + (','.join(str(x) for x in relations)) + '}\''))
 for row in cur:
     relations.remove(row[0])
 
